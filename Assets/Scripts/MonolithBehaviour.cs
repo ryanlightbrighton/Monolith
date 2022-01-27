@@ -61,7 +61,7 @@ public class MonolithBehaviour : MonoBehaviour
             this.enabled = false;
         }
 
-        DrawSineWave(pillar.transform.position, transform.position, 0.8f, 1.0f);
+        DrawSineWave(pillar.transform.position, transform.position, 0.8f, 0.5f, 3.0f, 100);
 
         bool seen = false;
         Vector3 v = Camera.main.WorldToViewportPoint(transform.position);
@@ -154,24 +154,23 @@ public class MonolithBehaviour : MonoBehaviour
 
     // calculates positions wrt sine wave for segments of line renderer
 
-    void DrawSineWave(Vector3 startPoint, Vector3 endPoint, float amplitude, float waveSpeed) {
+    void DrawSineWave(Vector3 startPoint, Vector3 endPoint, float amplitude, float frequency, float movementSpeed, int points) {
         float x = startPoint.x;
         float y;
         float z = startPoint.z;
-        
+        float Tau = 2 * Mathf.PI;
         float dist = Vector3.Distance(startPoint, endPoint);
-        float wavelength = dist / 5.0f;  // 5 wavecrests (20 segments each)
-        float waveNumber = (2 * Mathf.PI) / wavelength;
-        float angularFreq = waveNumber * waveSpeed;
         Vector3 temp = startPoint;
 
-        for (int i = 0; i < segments; i++)
-        {
-            temp = Vector3.MoveTowards(temp, endPoint, dist / segments); // segments was 100.0f
+        for (int i = 0; i < points; i++) {
+            temp = Vector3.MoveTowards(temp, endPoint, (dist / (float)points));
             x = temp.x;
             z = temp.z;
-            y = amplitude * Mathf.Sin((waveNumber * x) + (angularFreq * Time.time));
-            lineRenderer.SetPosition(i, new Vector3(x, y + 1.8f, z));
+            
+            //y = amplitude * Mathf.Sin((Tau *  frequency * i * (dist / (float)points)) + (Time.timeSinceLevelLoad * movementSpeed)); // constant
+            y = amplitude * Mathf.Sin( (Tau *  (6 * (frequency / dist)) * (i * (dist / (float)points))) + (Time.timeSinceLevelLoad * movementSpeed) ); // wavelength increases with distance
+            y += temp.y;
+            lineRenderer.SetPosition(i, new Vector3(x, y, z));
         }
     }
 
